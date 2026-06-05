@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -260,11 +260,11 @@ export default function App() {
 
   // --- Render different screens based on currentScreen state ---
 
-  // 1. Trip List Screen
-  if (currentScreen === 'tripList') {
-    return (
-      <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
+  const renderContent = () => {
+    // 1. Trip List Screen
+    if (currentScreen === 'tripList') {
+      return (
+        <>
         <StatusBar barStyle="dark-content" />
         <View style={styles.headerRow}>
           <Text style={styles.title}>Check my trip</Text>
@@ -292,16 +292,14 @@ export default function App() {
             </TouchableOpacity>
           )}
         />
-      </SafeAreaView>
-      </GestureHandlerRootView>
-    );
-  }
+        </>
+      );
+    }
 
-  // 2. Add/Edit Trip Screen
-  if (currentScreen === 'addEditTrip') {
-    return (
-      <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
+    // 2. Add/Edit Trip Screen
+    if (currentScreen === 'addEditTrip') {
+      return (
+        <>
         <StatusBar barStyle="dark-content" />
         <Text style={styles.title}>{selectedTrip ? 'Edit Trip' : 'Add New Trip'}</Text>
 
@@ -346,27 +344,29 @@ export default function App() {
 
           <Text style={styles.label}>Current Items ({currentTripItems.length})</Text>
           <View style={styles.itemsPreviewContainer}>
-            {Object.entries(
-              currentTripItems.reduce((acc, item) => {
+            {useMemo(() => {
+              const grouped = currentTripItems.reduce((acc, item) => {
                 if (!acc[item.category]) acc[item.category] = [];
                 acc[item.category].push(item);
                 return acc;
-              }, {})
-            )
-              .sort(([a], [b]) => a.localeCompare(b))
-              .map(([category, items]) => (
-                <View key={category}>
-                  <Text style={styles.previewCategoryHeader}>{category}</Text>
-                  {items.map((item) => (
-                    <View key={item.id} style={styles.addedItemRow}>
-                      <Text>{item.name}</Text>
-                      <TouchableOpacity onPress={() => removeItemFromCurrentTrip(item.id)}>
-                        <Text style={styles.removeItemText}>X</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ))}
-                </View>
-              ))}
+              }, {});
+              
+              return Object.entries(grouped)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([category, items]) => (
+                  <View key={category}>
+                    <Text style={styles.previewCategoryHeader}>{category}</Text>
+                    {items.map((item) => (
+                      <View key={item.id} style={styles.addedItemRow}>
+                        <Text>{item.name}</Text>
+                        <TouchableOpacity onPress={() => removeItemFromCurrentTrip(item.id)}>
+                          <Text style={styles.removeItemText}>X</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                ));
+            }, [currentTripItems])}
             {currentTripItems.length === 0 && <Text style={styles.emptyText}>No items added yet.</Text>}
           </View>
 
@@ -377,16 +377,14 @@ export default function App() {
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
         </ScrollView>
-      </SafeAreaView>
-      </GestureHandlerRootView>
-    );
-  }
+        </>
+      );
+    }
 
-  // 4. Settings Screen
-  if (currentScreen === 'settings') {
-    return (
-      <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
+    // 4. Settings Screen
+    if (currentScreen === 'settings') {
+      return (
+        <>
         <StatusBar barStyle="dark-content" />
         <View style={styles.headerContainer}>
           <Text style={styles.header}>Settings</Text>
@@ -422,29 +420,29 @@ export default function App() {
             </View>
           )}
         />
-      </SafeAreaView>
-      </GestureHandlerRootView>
-    );
-  }
+        </>
+      );
+    }
 
-  // 3. Checklist Screen
-  if (currentScreen === 'checklist' && selectedTrip) {
-    const packedCount = selectedTrip.packingList.filter((item) => item.packed).length;
-    const progress = selectedTrip.packingList.length > 0 ? packedCount / selectedTrip.packingList.length : 0;
+    // 3. Checklist Screen
+    if (currentScreen === 'checklist' && selectedTrip) {
+      const packedCount = selectedTrip.packingList.filter((item) => item.packed).length;
+      const progress = selectedTrip.packingList.length > 0 ? packedCount / selectedTrip.packingList.length : 0;
 
-    const sections = selectedTrip.packingList.reduce((acc, item) => {
-      const section = acc.find((s) => s.title === item.category);
-      if (section) {
-        section.data.push(item);
-      } else {
-        acc.push({ title: item.category, data: [item] });
-      }
-      return acc;
-    }, []).sort((a, b) => a.title.localeCompare(b.title));
+      const sections = useMemo(() => {
+        return selectedTrip.packingList.reduce((acc, item) => {
+          const section = acc.find((s) => s.title === item.category);
+          if (section) {
+            section.data.push(item);
+          } else {
+            acc.push({ title: item.category, data: [item] });
+          }
+          return acc;
+        }, []).sort((a, b) => a.title.localeCompare(b.title));
+      }, [selectedTrip.packingList]);
 
-    return (
-      <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={styles.container}>
+      return (
+        <>
         <StatusBar barStyle="dark-content" />
         <View style={styles.headerContainer}>
           <Text style={styles.header}>Trip to {selectedTrip.destination}</Text>
@@ -490,13 +488,20 @@ export default function App() {
         <TouchableOpacity style={styles.backButton} onPress={() => setCurrentScreen('tripList')}>
           <Text style={styles.buttonText}>Back to My Trips</Text>
         </TouchableOpacity>
-      </SafeAreaView>
-      </GestureHandlerRootView>
-    );
-  }
+        </>
+      );
+    }
 
-  // Fallback or initial screen (should ideally be tripList)
-  return <Text>Loading...</Text>;
+    return <Text>Loading...</Text>;
+  };
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container}>
+        {renderContent()}
+      </SafeAreaView>
+    </GestureHandlerRootView>
+  );
 }
 
 const styles = StyleSheet.create({

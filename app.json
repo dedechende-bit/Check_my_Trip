@@ -8,7 +8,7 @@
     "userInterfaceStyle": "light",
     "android": {
       "adaptiveIcon": { "backgroundColor": "#ffffff" },
-      "package": "com.yourname.trippacker"
+      "package": "com.yourname.checkmytrip"
     }
   }
 }
