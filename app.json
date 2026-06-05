@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Check My Trip",
+    "slug": "check-my-trip",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "android": {
+      "adaptiveIcon": { "backgroundColor": "#ffffff" },
+      "package": "com.yourname.trippacker"
+    }
+  }
+}

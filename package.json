@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "expo-checkbox": "*",
+    "@react-native-picker/picker": "*",
+    "@react-native-async-storage/async-storage": "*",
+    "react-native-gesture-handler": "*",
+    "react-native-reanimated": "*",
+    "expo": "~50.0.0",
+    "react": "18.2.0",
+    "react-native": "0.73.2"
+  }
+}
